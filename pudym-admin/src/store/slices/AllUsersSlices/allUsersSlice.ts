@@ -18,6 +18,7 @@ import type {
 import type {
     UserDetails,
 } from "@/types/AllUsersTypes/getUserDetails.types";
+import { updateUserBlockStatus } from "@/store/api/AllUsersApi/updateUserBlockStatus.api";
 
 interface AllUsersState {
     users: UserListItem[];
@@ -34,6 +35,8 @@ interface AllUsersState {
     deleteLoading: boolean;
     statusLoadingUserId: number | null;
     deleteLoadingUserId: number | null;
+    blockLoading: boolean;
+    blockLoadingUserId: number | null;
     error: string | null;
     statsError: string | null;
     detailsError: string | null;
@@ -63,8 +66,10 @@ const initialState: AllUsersState = {
     detailsLoading: false,
     statusLoading: false,
     deleteLoading: false,
+    blockLoading: false,
     statusLoadingUserId: null,
     deleteLoadingUserId: null,
+    blockLoadingUserId: null,
     error: null,
     statsError: null,
     detailsError: null,
@@ -171,6 +176,37 @@ export const changeUserStatus = createAsyncThunk<
     }
 );
 
+
+/**
+ * Block / Unblock User
+ */
+export const changeUserBlockStatus = createAsyncThunk<
+    Awaited<ReturnType<typeof updateUserBlockStatus>>,
+    {
+        userId: number;
+        blocked_by_admin: boolean;
+    },
+    { rejectValue: string }
+>(
+    "allUsers/changeUserBlockStatus",
+    async (
+        { userId, blocked_by_admin },
+        { rejectWithValue }
+    ) => {
+        try {
+            return await updateUserBlockStatus(
+                userId,
+                blocked_by_admin
+            );
+        } catch (error) {
+            return rejectWithValue(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to update user block status"
+            );
+        }
+    }
+);
 /**
  * Delete User
  */
@@ -370,6 +406,68 @@ const allUsersSlice = createSlice({
                 state.error =
                     action.payload ||
                     "Failed to update user status";
+            });
+        /*
+* ==========================================
+* BLOCK / UNBLOCK USER
+* ==========================================
+*/
+
+        builder
+            .addCase(changeUserBlockStatus.pending, (state, action) => {
+                state.blockLoading = true;
+                state.blockLoadingUserId = action.meta.arg.userId;
+                state.error = null;
+            })
+
+            .addCase(changeUserBlockStatus.fulfilled, (state, action) => {
+                state.blockLoading = false;
+                state.blockLoadingUserId = null;
+
+                if (!action.payload.success) {
+                    return;
+                }
+
+                const updatedUser = action.payload.data;
+
+                /*
+                 * Update user in the All Users list
+                 */
+                const user = state.users.find(
+                    (item) =>
+                        item.user_id === updatedUser.user_id
+                );
+
+                if (user) {
+                    user.blocked_by_admin =
+                        updatedUser.blocked_by_admin;
+
+                    user.is_deactivated =
+                        updatedUser.is_deactivated;
+                }
+
+                /*
+                 * Update currently opened User View
+                 */
+                if (
+                    state.selectedUser?.user_id ===
+                    updatedUser.user_id
+                ) {
+                    state.selectedUser.blocked_by_admin =
+                        updatedUser.blocked_by_admin;
+
+                    state.selectedUser.is_deactivated =
+                        updatedUser.is_deactivated;
+                }
+            })
+
+            .addCase(changeUserBlockStatus.rejected, (state, action) => {
+                state.blockLoading = false;
+                state.blockLoadingUserId = null;
+
+                state.error =
+                    action.payload ||
+                    "Failed to update user block status";
             });
         /*
          * ==========================================

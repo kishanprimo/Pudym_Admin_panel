@@ -6,8 +6,12 @@ import { useEffect, useState } from "react";
 import {
     LayoutDashboard,
     Users,
+    UserCheck,
+    BadgeCheck,
     Plus,
     Minus,
+    Percent,
+    ArrowDownCircle,
 } from "lucide-react";
 
 type SubMenuItem = {
@@ -46,6 +50,52 @@ const menuGroups: MenuGroup[] = [
                 name: "All Users",
                 href: "/AllUsers/userslist",
                 icon: Users,
+            },
+        ],
+    },
+    {
+        heading: "CREATOR MANAGEMENT",
+        items: [
+            {
+                name: "Creator Requests",
+                href: "/creator-requests",
+                icon: UserCheck,
+            },
+            {
+                name: "Creators",
+                href: "/creators",
+                icon: BadgeCheck,
+            },
+        ],
+    },
+    {
+        heading: "FEES MANAGEMENT",
+        items: [
+            {
+                name: "Fees",
+                icon: Percent,
+                children: [
+                    { name: "Fees Type List", href: "/fees/fees-type-list" },
+                    { name: "Add Fees Type", href: "/fees/add-fee-type" },
+                ],
+            },
+            {
+                name: "Creator Fees",
+                icon: Percent,
+                children: [
+                    { name: "Creator Fees List", href: "/fees/creator-fees-list" },
+                    { name: "Add Creator Fees", href: "/fees/add-creator-fee" },
+                ],
+            },
+        ],
+    },
+    {
+        heading: "WITHDRAWAL",
+        items: [
+            {
+                name: "Withdrawals",
+                href: "/withdrawal/list",
+                icon: ArrowDownCircle,
             },
         ],
     },

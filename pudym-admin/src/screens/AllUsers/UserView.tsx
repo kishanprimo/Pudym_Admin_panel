@@ -21,13 +21,15 @@ import {
     BadgeCheck,
     Activity,
     ShieldAlert,
+    Loader2,
     Fingerprint,
 } from "lucide-react";
 
 import {
     fetchUserDetails,
+    changeUserBlockStatus,
 } from "@/store/slices/AllUsersSlices/allUsersSlice";
-
+import { toast } from "react-toastify";
 import {
     useAppDispatch,
     useAppSelector,
@@ -47,6 +49,8 @@ export default function UserView() {
         selectedUser,
         detailsLoading,
         detailsError,
+        blockLoading,
+        blockLoadingUserId,
     } = useAppSelector((state) => state.allUsers);
 
     const [imageError, setImageError] = useState(false);
@@ -63,6 +67,39 @@ export default function UserView() {
         dispatch(fetchUserDetails(Number(userId)));
     }, [dispatch, userId]);
 
+    /*
+ * ==========================================
+ * BLOCK / UNBLOCK USER
+ * ==========================================
+ */
+
+    const handleBlockToggle = async () => {
+        if (!selectedUser || !userId || blockLoading) {
+            return;
+        }
+
+        const shouldBlock = !selectedUser.blocked_by_admin;
+
+        const result = await dispatch(
+            changeUserBlockStatus({
+                userId: Number(userId),
+                blocked_by_admin: shouldBlock,
+            })
+        );
+
+        if (changeUserBlockStatus.fulfilled.match(result)) {
+            toast.success(
+                shouldBlock
+                    ? "User blocked successfully"
+                    : "User unblocked successfully"
+            );
+        } else {
+            toast.error(
+                result.payload ||
+                "Failed to update user block status"
+            );
+        }
+    };
     /*
      * ==========================================
      * FORMATTERS
@@ -431,9 +468,9 @@ export default function UserView() {
                         </div>
 
 
-                        {/* User ID */}
+                        {/* User ID + Block Button */}
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-3">
 
                             <div className="rounded-[10px] border border-[#EAECF0] bg-[#F9FAFB] px-4 py-2.5">
 
@@ -446,6 +483,50 @@ export default function UserView() {
                                 </p>
 
                             </div>
+
+                            <button
+                                type="button"
+                                onClick={handleBlockToggle}
+                                disabled={
+                                    blockLoading &&
+                                    blockLoadingUserId === user.user_id
+                                }
+                                className={`
+            inline-flex h-[42px] items-center justify-center gap-2
+            rounded-[9px] px-4
+            text-[13px] font-semibold
+            transition-all
+            disabled:cursor-not-allowed
+            disabled:opacity-60
+            ${user.blocked_by_admin
+                                        ? "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                                        : "border border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
+                                    }
+        `}
+                            >
+
+                                {blockLoading &&
+                                    blockLoadingUserId === user.user_id ? (
+                                    <>
+                                        <Loader2
+                                            size={16}
+                                            className="animate-spin"
+                                        />
+                                        Updating...
+                                    </>
+                                ) : user.blocked_by_admin ? (
+                                    <>
+                                        <ShieldCheck size={16} />
+                                        Unblock User
+                                    </>
+                                ) : (
+                                    <>
+                                        <ShieldAlert size={16} />
+                                        Block User
+                                    </>
+                                )}
+
+                            </button>
 
                         </div>
 
