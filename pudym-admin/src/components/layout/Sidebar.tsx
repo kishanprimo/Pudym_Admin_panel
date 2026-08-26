@@ -12,6 +12,9 @@ import {
     Minus,
     Percent,
     ArrowDownCircle,
+    FileWarning,
+    ShieldAlert,
+    DollarSign,
 } from "lucide-react";
 
 type SubMenuItem = {
@@ -69,11 +72,26 @@ const menuGroups: MenuGroup[] = [
         ],
     },
     {
+        heading: "MODERATION REPORTS",
+        items: [
+            {
+                name: "Content Reports",
+                href: "/moderation/content-reports",
+                icon: FileWarning,
+            },
+            {
+                name: "User Reports",
+                href: "/moderation/user-reports",
+                icon: ShieldAlert,
+            },
+        ],
+    },
+    {
         heading: "FEES MANAGEMENT",
         items: [
             {
                 name: "Fees",
-                icon: Percent,
+                icon: DollarSign,
                 children: [
                     { name: "Fees Type List", href: "/fees/fees-type-list" },
                     { name: "Add Fees Type", href: "/fees/add-fee-type" },

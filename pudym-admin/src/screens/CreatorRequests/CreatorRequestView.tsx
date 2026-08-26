@@ -56,7 +56,7 @@ export default function CreatorRequestView() {
         selectedRequest,
         detailsLoading,
         detailsError,
-        
+
         statusError,
     } = useAppSelector(
         (state) =>
@@ -523,22 +523,158 @@ export default function CreatorRequestView() {
 
 
             {/* ========================================
-                PAGE TITLE
-            ======================================== */}
+    PAGE TITLE + STATUS ACTIONS
+======================================== */}
 
-            <div className="mb-6">
+            <div className="mb-6 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
 
-                <h1 className="text-[28px] font-semibold tracking-[-0.02em] text-[#101828]">
-                    Creator Request
-                </h1>
+                {/* TITLE */}
 
-                <p className="mt-1 text-[14px] text-[#667085]">
-                    Review the creator's application and verification information.
-                </p>
+                <div className="min-w-0">
+
+                    <h1 className="text-[28px] font-semibold tracking-[-0.02em] text-[#101828]">
+                        Creator Request
+                    </h1>
+
+                    <p className="mt-1 text-[14px] text-[#667085]">
+                        Review the creator's application and verification information.
+                    </p>
+
+                </div>
+
+
+                {/* STATUS ACTIONS */}
+
+                <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+
+                    {/* REJECT */}
+
+                    <button
+                        type="button"
+                        disabled={
+                            updatingStatus !== null
+                        }
+                        onClick={() =>
+                            handleStatusUpdate(
+                                "rejected"
+                            )
+                        }
+                        className="inline-flex h-[40px] items-center justify-center gap-2 rounded-[9px] border border-red-200 bg-red-50 px-4 text-[13px] font-semibold text-red-600 transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+
+                        {updatingStatus === "rejected" ? (
+                            <Loader2
+                                size={15}
+                                className="animate-spin"
+                            />
+                        ) : (
+                            <CircleX
+                                size={15}
+                            />
+                        )}
+
+                        Reject
+
+                    </button>
+
+
+                    {/* PENDING */}
+
+                    <button
+                        type="button"
+                        disabled={
+                            updatingStatus !== null
+                        }
+                        onClick={() =>
+                            handleStatusUpdate(
+                                "pending"
+                            )
+                        }
+                        className="inline-flex h-[40px] items-center justify-center gap-2 rounded-[9px] border border-orange-200 bg-orange-50 px-4 text-[13px] font-semibold text-orange-600 transition-colors hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+
+                        {updatingStatus === "pending" ? (
+                            <Loader2
+                                size={15}
+                                className="animate-spin"
+                            />
+                        ) : (
+                            <Clock3
+                                size={15}
+                            />
+                        )}
+
+                        Pending
+
+                    </button>
+
+
+                    {/* UNDER REVIEW */}
+
+                    <button
+                        type="button"
+                        disabled={
+                            updatingStatus !== null
+                        }
+                        onClick={() =>
+                            handleStatusUpdate(
+                                "under_review"
+                            )
+                        }
+                        className="inline-flex h-[40px] items-center justify-center gap-2 rounded-[9px] border border-blue-200 bg-blue-50 px-4 text-[13px] font-semibold text-blue-600 transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+
+                        {updatingStatus === "under_review" ? (
+                            <Loader2
+                                size={15}
+                                className="animate-spin"
+                            />
+                        ) : (
+                            <Clock3
+                                size={15}
+                            />
+                        )}
+
+                        Under Review
+
+                    </button>
+
+
+                    {/* APPROVE */}
+
+                    <button
+                        type="button"
+                        disabled={
+                            updatingStatus !== null
+                        }
+                        onClick={() =>
+                            handleStatusUpdate(
+                                "approved"
+                            )
+                        }
+                        className="inline-flex h-[40px] items-center justify-center gap-2 rounded-[9px] bg-[#2563EB] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+
+                        {updatingStatus === "approved" ? (
+                            <Loader2
+                                size={15}
+                                className="animate-spin"
+                            />
+                        ) : (
+                            <CircleCheck
+                                size={15}
+                            />
+                        )}
+
+                        Approve
+
+                    </button>
+
+                </div>
 
             </div>
 
-
+            
             {/* ========================================
                 PROFILE HERO
             ======================================== */}

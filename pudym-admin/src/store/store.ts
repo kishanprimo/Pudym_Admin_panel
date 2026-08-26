@@ -7,6 +7,8 @@ import creatorsReducer from "@/store/slices/CreatorsSlices/creatorsSlice";
 import feesReducer from "@/store/slices/FeesSlices/feesSlice";
 import creatorFeesReducer from "@/store/slices/CreatorFeesSlices/creatorFeesSlice";
 import withdrawalReducer from "@/store/slices/WithdrawalSlices/withdrawalSlice";
+import contentReportsReducer from "@/store/slices/ModerationSlices/contentReportsSlice";
+import userReportsReducer from "@/store/slices/ModerationSlices/userReportsSlice";
 
 export const store = configureStore({
     reducer: {
@@ -17,6 +19,8 @@ export const store = configureStore({
         fees: feesReducer,
         creatorFees: creatorFeesReducer,
         withdrawal: withdrawalReducer,
+        contentReports: contentReportsReducer,
+        userReports: userReportsReducer,
     },
 });
 
