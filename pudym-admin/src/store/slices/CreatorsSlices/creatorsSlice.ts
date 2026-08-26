@@ -255,6 +255,7 @@ export const changeCreatorStatus =
         {
             userId: number;
             is_deactivated: boolean;
+            reason: string;
         },
         { rejectValue: string }
     >(
@@ -264,6 +265,7 @@ export const changeCreatorStatus =
             {
                 userId,
                 is_deactivated,
+                reason,
             },
             { rejectWithValue }
         ) => {
@@ -272,7 +274,8 @@ export const changeCreatorStatus =
 
                 return await updateCreatorStatus(
                     userId,
-                    is_deactivated
+                    is_deactivated,
+                    reason
                 );
 
             } catch (error: any) {
@@ -639,10 +642,18 @@ const creatorsSlice =
                             creator.is_deactivated =
                                 isNowDeactivated;
 
+                            creator.admin_deactivation_reason =
+                                updatedCreator.admin_deactivation_reason;
+
+                            creator.blocked_by_admin =
+                                updatedCreator.blocked_by_admin;
+
                             creator.status =
-                                isNowDeactivated
-                                    ? "deactivated"
-                                    : "active";
+                                updatedCreator.blocked_by_admin
+                                    ? "blocked"
+                                    : isNowDeactivated
+                                        ? "deactivated"
+                                        : "active";
 
                             creator.role =
                                 updatedCreator.role;
@@ -663,16 +674,21 @@ const creatorsSlice =
                             selected.user_id ===
                             updatedCreator.user_id
                         ) {
-
                             selected.is_deactivated =
-                                updatedCreator
-                                    .is_deactivated;
+                                updatedCreator.is_deactivated;
+
+                            selected.admin_deactivation_reason =
+                                updatedCreator.admin_deactivation_reason;
+
+                            selected.blocked_by_admin =
+                                updatedCreator.blocked_by_admin;
 
                             selected.status =
-                                updatedCreator
-                                    .is_deactivated
-                                    ? "deactivated"
-                                    : "active";
+                                updatedCreator.blocked_by_admin
+                                    ? "blocked"
+                                    : updatedCreator.is_deactivated
+                                        ? "deactivated"
+                                        : "active";
 
                             selected.role =
                                 updatedCreator.role;

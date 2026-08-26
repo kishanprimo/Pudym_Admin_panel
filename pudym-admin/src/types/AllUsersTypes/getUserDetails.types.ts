@@ -32,8 +32,9 @@ export interface UserDetails {
   total_socials: number | null;
 
   blocked_by_admin: boolean;
+  admin_block_reason: string | null;
   is_deactivated: boolean;
-
+  admin_deactivation_reason: string | null;
   createdAt: string;
   updatedAt: string;
 }

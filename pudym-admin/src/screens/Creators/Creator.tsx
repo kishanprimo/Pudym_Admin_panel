@@ -29,7 +29,7 @@ import Search from "@/components/common/Search";
 import TableHeader from "@/components/common/TableHeader";
 import Pagination from "@/components/common/Pagination";
 import Action from "@/components/common/Action";
-import TogglableSwitch from "@/components/common/TogglableSwitch";
+import Tags from "@/components/common/Tags";
 import DateTime from "@/components/common/DateTime";
 import TableSkeleton from "@/components/common/TableSkeleton";
 
@@ -46,8 +46,6 @@ const Creator = () => {
         stats,
         loading,
         statsLoading,
-        statusLoading,
-        statusLoadingUserId,
     } = useAppSelector(
         (state) => state.creators
     );
@@ -177,24 +175,6 @@ const Creator = () => {
         );
     };
 
-    /*
-     * ==========================================
-     * CREATOR STATUS TOGGLE
-     * ==========================================
-     */
-
-    const handleCreatorStatusToggle = async (
-        userId: number,
-        currentIsDeactivated: boolean
-    ) => {
-
-        await dispatch(
-            changeCreatorStatus({
-                userId,
-                is_deactivated: !currentIsDeactivated,
-            })
-        );
-    };
     /*
      * ==========================================
      * FORMATTERS
@@ -727,23 +707,25 @@ const Creator = () => {
 
                                                 {/* STATUS */}
 
+                                                {/* STATUS */}
+
                                                 <td className="px-3 py-4">
 
-                                                    <TogglableSwitch
-                                                        isActive={!creator.is_deactivated}
-                                                        onToggle={() =>
-                                                            handleCreatorStatusToggle(
-                                                                creator.user_id,
-                                                                creator.is_deactivated
-                                                            )
+                                                    <Tags
+                                                        text={
+                                                            creator.blocked_by_admin
+                                                                ? "Blocked"
+                                                                : creator.is_deactivated
+                                                                    ? "Deactivated"
+                                                                    : "Active"
                                                         }
-                                                        disabled={
-                                                            statusLoading &&
-                                                            statusLoadingUserId === creator.user_id
+                                                        variant={
+                                                            creator.blocked_by_admin
+                                                                ? "red"
+                                                                : creator.is_deactivated
+                                                                    ? "orange"
+                                                                    : "emerald"
                                                         }
-                                                        activeLabel="Active"
-                                                        inactiveLabel="Deactivated"
-                                                        showLabel
                                                     />
 
                                                 </td>

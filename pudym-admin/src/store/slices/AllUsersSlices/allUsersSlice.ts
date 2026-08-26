@@ -153,18 +153,20 @@ export const changeUserStatus = createAsyncThunk<
     {
         userId: number;
         is_deactivated: boolean;
+        reason: string;
     },
     { rejectValue: string }
 >(
     "allUsers/changeUserStatus",
     async (
-        { userId, is_deactivated },
+        { userId, is_deactivated, reason },
         { rejectWithValue }
     ) => {
         try {
             return await updateUserStatus(
                 userId,
-                is_deactivated
+                is_deactivated,
+                reason
             );
         } catch (error) {
             return rejectWithValue(
@@ -185,18 +187,20 @@ export const changeUserBlockStatus = createAsyncThunk<
     {
         userId: number;
         blocked_by_admin: boolean;
+        reason: string;
     },
     { rejectValue: string }
 >(
     "allUsers/changeUserBlockStatus",
     async (
-        { userId, blocked_by_admin },
+        { userId, blocked_by_admin, reason },
         { rejectWithValue }
     ) => {
         try {
             return await updateUserBlockStatus(
                 userId,
-                blocked_by_admin
+                blocked_by_admin,
+                reason
             );
         } catch (error) {
             return rejectWithValue(
@@ -396,6 +400,9 @@ const allUsersSlice = createSlice({
 
                     state.selectedUser.blocked_by_admin =
                         updatedUser.blocked_by_admin;
+
+                    state.selectedUser.admin_deactivation_reason =
+                        updatedUser.admin_deactivation_reason;
                 }
             })
 
@@ -458,6 +465,9 @@ const allUsersSlice = createSlice({
 
                     state.selectedUser.is_deactivated =
                         updatedUser.is_deactivated;
+
+                    state.selectedUser.admin_block_reason =
+                        updatedUser.admin_block_reason;
                 }
             })
 

@@ -10,7 +10,7 @@ import {
     useRouter,
     useSearchParams,
 } from "next/navigation";
-
+import { toast } from "react-toastify";
 import {
     ArrowLeft,
     User,
@@ -28,6 +28,8 @@ import {
     CheckCircle2,
     Clock3,
     Globe2,
+    Loader2,
+    ShieldAlert,
 } from "lucide-react";
 
 import {
@@ -38,11 +40,12 @@ import {
 import {
     fetchCreatorDetails,
     clearSelectedCreator,
+    changeCreatorStatus,
 } from "@/store/slices/CreatorsSlices/creatorsSlice";
 
 import Tags from "@/components/common/Tags";
 import DateTime from "@/components/common/DateTime";
-
+import ActivationModal from "@/components/common/ActivationModal";
 
 const CreatorView = () => {
 
@@ -62,17 +65,21 @@ const CreatorView = () => {
         selectedCreator,
         detailsLoading,
         detailsError,
+        statusLoading,
+        statusLoadingUserId,
     } = useAppSelector(
         (state) => state.creators
     );
-
 
     const [
         imageError,
         setImageError,
     ] = useState(false);
 
-
+    const [
+        statusModalOpen,
+        setStatusModalOpen,
+    ] = useState(false);
     /*
      * ==========================================
      * FETCH CREATOR DETAILS
@@ -113,7 +120,68 @@ const CreatorView = () => {
         userId,
     ]);
 
+    /*
+     * ==========================================
+     * ACTIVATE / DEACTIVATE CREATOR
+     * ==========================================
+     */
 
+    const handleStatusToggle = () => {
+        if (
+            !selectedCreator ||
+            !userId ||
+            statusLoading ||
+            selectedCreator.blocked_by_admin
+        ) {
+            return;
+        }
+
+        setStatusModalOpen(true);
+    };
+
+
+    const handleStatusConfirm = async (
+        reason: string
+    ) => {
+        if (
+            !selectedCreator ||
+            !userId ||
+            statusLoading ||
+            selectedCreator.blocked_by_admin
+        ) {
+            return;
+        }
+
+        const shouldDeactivate =
+            !selectedCreator.is_deactivated;
+
+        const result = await dispatch(
+            changeCreatorStatus({
+                userId: Number(userId),
+                is_deactivated: shouldDeactivate,
+                reason,
+            })
+        );
+
+        if (
+            changeCreatorStatus.fulfilled.match(
+                result
+            )
+        ) {
+            toast.success(
+                shouldDeactivate
+                    ? "Creator deactivated successfully"
+                    : "Creator activated successfully"
+            );
+
+            setStatusModalOpen(false);
+        } else {
+            toast.error(
+                result.payload ||
+                "Failed to update creator status"
+            );
+        }
+    };
     /*
      * ==========================================
      * LOADING
@@ -475,9 +543,10 @@ const CreatorView = () => {
                                 )}
 
                                 {/* online dot */}
-                                {!creator.is_deactivated && (
-                                    <span className="absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-500" />
-                                )}
+                                {!creator.blocked_by_admin &&
+                                    !creator.is_deactivated && (
+                                        <span className="absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-500" />
+                                    )}
                             </div>
 
                             {/* NAME */}
@@ -486,11 +555,22 @@ const CreatorView = () => {
                                     <h2 className="text-[20px] font-bold tracking-[-0.015em] text-[#101828]">
                                         {getCreatorName()}
                                     </h2>
-                                    {creator.is_deactivated ? (
-                                        <Tags text="Deactivated" variant="red" />
-                                    ) : (
-                                        <Tags text="Active" variant="emerald" />
-                                    )}
+                                    <Tags
+                                        text={
+                                            creator.blocked_by_admin
+                                                ? "Blocked"
+                                                : creator.is_deactivated
+                                                    ? "Deactivated"
+                                                    : "Active"
+                                        }
+                                        variant={
+                                            creator.blocked_by_admin
+                                                ? "red"
+                                                : creator.is_deactivated
+                                                    ? "orange"
+                                                    : "emerald"
+                                        }
+                                    />
                                 </div>
                                 <p className="mt-0.5 text-[13px] font-medium text-[#667085]">
                                     {username}
@@ -506,8 +586,9 @@ const CreatorView = () => {
                         </div>
 
 
-                        {/* SUMMARY CARDS */}
-                        <div className="flex flex-wrap gap-3 lg:pb-1">
+                        {/* SUMMARY + STATUS ACTION */}
+
+                        <div className="flex flex-wrap items-center gap-3 lg:pb-1">
 
                             <SummaryCard
                                 icon={<Coins size={16} />}
@@ -522,6 +603,55 @@ const CreatorView = () => {
                                 value={creator.total_socials ?? 0}
                                 accent="purple"
                             />
+
+                            {!creator.blocked_by_admin && (
+                                <button
+                                    type="button"
+                                    onClick={handleStatusToggle}
+                                    disabled={
+                                        statusLoading &&
+                                        statusLoadingUserId ===
+                                        creator.user_id
+                                    }
+                                    className={`
+                inline-flex h-[42px]
+                items-center justify-center
+                gap-2 rounded-[9px]
+                px-4 text-[13px]
+                font-semibold transition-all
+                disabled:cursor-not-allowed
+                disabled:opacity-60
+                ${creator.is_deactivated
+                                            ? "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                                            : "border border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100"
+                                        }
+            `}
+                                >
+
+                                    {statusLoading &&
+                                        statusLoadingUserId ===
+                                        creator.user_id ? (
+                                        <>
+                                            <Loader2
+                                                size={16}
+                                                className="animate-spin"
+                                            />
+                                            Updating...
+                                        </>
+                                    ) : creator.is_deactivated ? (
+                                        <>
+                                            <ShieldCheck size={16} />
+                                            Activate Creator
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ShieldAlert size={16} />
+                                            Deactivate Creator
+                                        </>
+                                    )}
+
+                                </button>
+                            )}
 
                         </div>
 
@@ -824,14 +954,36 @@ const CreatorView = () => {
 
                 <VerificationItem
                     label="Account Status"
-                    verified={!creator.is_deactivated}
+                    verified={
+                        !creator.blocked_by_admin &&
+                        !creator.is_deactivated
+                    }
                     value={
-                        creator.is_deactivated
-                            ? "Deactivated"
-                            : "Active"
+                        creator.blocked_by_admin
+                            ? "Blocked"
+                            : creator.is_deactivated
+                                ? "Deactivated"
+                                : "Active"
                     }
                 />
-
+                {creator.blocked_by_admin && (
+                    <DetailItem
+                        label="Block Reason"
+                        value={
+                            displayValue(
+                                creator.admin_block_reason
+                            )
+                        }
+                    />
+                )}
+                <DetailItem
+                    label="Admin Status Reason"
+                    value={
+                        displayValue(
+                            creator.admin_deactivation_reason
+                        )
+                    }
+                />
                 <VerificationItem
                     label="Profile Verification"
                     verified={
@@ -880,7 +1032,46 @@ const CreatorView = () => {
             {/* BOTTOM SPACE */}
 
             <div className="h-3" />
+            {/* ========================================
+    ACTIVATE / DEACTIVATE MODAL
+======================================== */}
 
+            {statusModalOpen && (
+                <ActivationModal
+                    isOpen={true}
+                    title={
+                        creator.is_deactivated
+                            ? "Activate Creator?"
+                            : "Deactivate Creator?"
+                    }
+                    description={
+                        creator.is_deactivated
+                            ? "Please provide a reason for activating this creator."
+                            : "Please provide a reason for deactivating this creator."
+                    }
+                    actionLabel={
+                        creator.is_deactivated
+                            ? "Activate Creator"
+                            : "Deactivate Creator"
+                    }
+                    placeholder={
+                        creator.is_deactivated
+                            ? "Enter reason for activation..."
+                            : "Enter reason for deactivation..."
+                    }
+                    loading={
+                        statusLoading &&
+                        statusLoadingUserId ===
+                        creator.user_id
+                    }
+                    onClose={() => {
+                        if (!statusLoading) {
+                            setStatusModalOpen(false);
+                        }
+                    }}
+                    onConfirm={handleStatusConfirm}
+                />
+            )}
         </div>
     );
 };
@@ -1012,8 +1203,7 @@ const DetailItem = ({
     return (
         <div
             className={
-                `px-6 py-4 ${
-                    fullWidth ? "md:col-span-2 border-t border-[#F2F4F7]" : ""
+                `px-6 py-4 ${fullWidth ? "md:col-span-2 border-t border-[#F2F4F7]" : ""
                 }`
             }
         >

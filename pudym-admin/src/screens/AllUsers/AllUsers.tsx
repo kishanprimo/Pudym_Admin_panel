@@ -16,10 +16,9 @@ import { useRouter } from "next/navigation";
 import {
     fetchAllUsers,
     fetchUserStats,
-    changeUserStatus,
     removeUser,
 } from "@/store/slices/AllUsersSlices/allUsersSlice";
-import TogglableSwitch from "@/components/common/TogglableSwitch";
+
 import UserDeleteModal from "@/components/common/UserDeleteModal";
 import {
     useAppDispatch,
@@ -45,7 +44,6 @@ const AllUsers = () => {
         stats,
         loading,
         statsLoading,
-        statusLoading,
         deleteLoading,
     } = useAppSelector((state) => state.allUsers);
 
@@ -54,9 +52,6 @@ const AllUsers = () => {
     const [exportOpen, setExportOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-
-    const [statusLoadingUserId, setStatusLoadingUserId] =
-        useState<number | null>(null);
 
     const [deleteLoadingUserId, setDeleteLoadingUserId] =
         useState<number | null>(null);
@@ -124,47 +119,6 @@ const AllUsers = () => {
         setCurrentPage(1);
     };
 
-    /*
-     * ==========================================
-     * STATUS
-     * ==========================================
-     */
-
-    const handleStatusChange = async (
-        userId: number,
-        isDeactivated: boolean
-    ) => {
-        setStatusLoadingUserId(userId);
-
-        const result = await dispatch(
-            changeUserStatus({
-                userId,
-                is_deactivated: isDeactivated,
-            })
-        );
-
-        setStatusLoadingUserId(null);
-
-        if (changeUserStatus.fulfilled.match(result)) {
-            toast.success(
-                isDeactivated
-                    ? "User deactivated successfully"
-                    : "User activated successfully"
-            );
-
-            /*
-             * Refresh statistics only.
-             *
-             * The table itself is already updated
-             * optimistically by Redux.
-             */
-            dispatch(fetchUserStats());
-        } else {
-            toast.error(
-                result.payload || "Failed to update user status"
-            );
-        }
-    };
 
     /*
      * ==========================================
@@ -593,11 +547,7 @@ const AllUsers = () => {
 
                                 users.map((user) => {
 
-                                    const isStatusLoading =
-                                        statusLoading &&
-                                        statusLoadingUserId ===
-                                        user.user_id;
-
+                                 
                                     const isDeleteLoading =
                                         deleteLoading &&
                                         deleteLoadingUserId ===
@@ -727,26 +677,24 @@ const AllUsers = () => {
 
                                             {/* STATUS */}
 
+
                                             <td className="px-5 py-4">
 
-                                                <TogglableSwitch
-                                                    isActive={!isDeactivated}
-                                                    onToggle={() => {
-                                                        if (isBlocked || isStatusLoading) return;
-
-                                                        handleStatusChange(
-                                                            user.user_id,
-                                                            !isDeactivated
-                                                        );
-                                                    }}
-                                                    activeLabel="Active"
-                                                    inactiveLabel="Deactivated"
-                                                    activeClassName="text-emerald-600 bg-emerald-50"
-                                                    inactiveClassName="text-orange-600 bg-orange-50"
-                                                    showLabel={true}
-                                                    disabled={isBlocked}
-                                                    disabledLabel="Disabled"
-                                                    disabledClassName="text-red-600 bg-red-50"
+                                                <Tags
+                                                    text={
+                                                        isBlocked
+                                                            ? "Blocked"
+                                                            : isDeactivated
+                                                                ? "Deactivated"
+                                                                : "Active"
+                                                    }
+                                                    variant={
+                                                        isBlocked
+                                                            ? "red"
+                                                            : isDeactivated
+                                                                ? "orange"
+                                                                : "green"
+                                                    }
                                                 />
 
                                             </td>

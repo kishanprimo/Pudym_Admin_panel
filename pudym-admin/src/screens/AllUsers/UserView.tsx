@@ -24,17 +24,17 @@ import {
     Loader2,
     Fingerprint,
 } from "lucide-react";
-
 import {
     fetchUserDetails,
     changeUserBlockStatus,
+    changeUserStatus,
 } from "@/store/slices/AllUsersSlices/allUsersSlice";
 import { toast } from "react-toastify";
 import {
     useAppDispatch,
     useAppSelector,
 } from "@/store/hooks";
-
+import ActivationModal from "@/components/common/ActivationModal";
 import Tags from "@/components/common/Tags";
 import DateTime from "@/components/common/DateTime";
 
@@ -49,12 +49,22 @@ export default function UserView() {
         selectedUser,
         detailsLoading,
         detailsError,
+        statusLoading,
+        statusLoadingUserId,
         blockLoading,
         blockLoadingUserId,
     } = useAppSelector((state) => state.allUsers);
 
     const [imageError, setImageError] = useState(false);
 
+    const [statusModalOpen, setStatusModalOpen] =
+        useState(false);
+
+    const [statusAction, setStatusAction] =
+        useState<"activate" | "deactivate" | null>(null);
+
+    const [blockModalOpen, setBlockModalOpen] =
+        useState(false);
     /*
      * ==========================================
      * FETCH USER DETAILS
@@ -66,24 +76,93 @@ export default function UserView() {
 
         dispatch(fetchUserDetails(Number(userId)));
     }, [dispatch, userId]);
+    const handleStatusAction = (
+        action: "activate" | "deactivate"
+    ) => {
+        if (
+            !selectedUser ||
+            !userId ||
+            statusLoading ||
+            blockLoading
+        ) {
+            return;
+        }
 
+        // Blocked users cannot be activated/deactivated.
+        if (selectedUser.blocked_by_admin) {
+            return;
+        }
+
+        setStatusAction(action);
+        setStatusModalOpen(true);
+    };
+    const handleStatusConfirm = async (
+        reason: string
+    ) => {
+        if (
+            !selectedUser ||
+            !userId ||
+            !statusAction ||
+            statusLoading
+        ) {
+            return;
+        }
+
+        const isDeactivated =
+            statusAction === "deactivate";
+
+        const result = await dispatch(
+            changeUserStatus({
+                userId: Number(userId),
+                is_deactivated: isDeactivated,
+                reason,
+            })
+        );
+
+        if (changeUserStatus.fulfilled.match(result)) {
+            toast.success(
+                isDeactivated
+                    ? "User deactivated successfully"
+                    : "User activated successfully"
+            );
+
+            setStatusModalOpen(false);
+            setStatusAction(null);
+        } else {
+            toast.error(
+                result.payload ||
+                "Failed to update user status"
+            );
+        }
+    };
     /*
  * ==========================================
  * BLOCK / UNBLOCK USER
  * ==========================================
  */
 
-    const handleBlockToggle = async () => {
+    const handleBlockToggle = () => {
         if (!selectedUser || !userId || blockLoading) {
             return;
         }
 
-        const shouldBlock = !selectedUser.blocked_by_admin;
+        setBlockModalOpen(true);
+    };
+    const handleBlockConfirm = async (
+        reason: string
+    ) => {
+        if (!selectedUser || !userId || blockLoading) {
+            return;
+        }
+
+        const shouldBlock =
+            !selectedUser.blocked_by_admin;
 
         const result = await dispatch(
             changeUserBlockStatus({
                 userId: Number(userId),
                 blocked_by_admin: shouldBlock,
+                reason,
             })
         );
 
@@ -93,6 +172,8 @@ export default function UserView() {
                     ? "User blocked successfully"
                     : "User unblocked successfully"
             );
+
+            setBlockModalOpen(false);
         } else {
             toast.error(
                 result.payload ||
@@ -470,7 +551,11 @@ export default function UserView() {
 
                         {/* User ID + Block Button */}
 
+                        {/* User ID + STATUS ACTIONS */}
+
                         <div className="flex flex-wrap items-center gap-3">
+
+                            {/* USER ID */}
 
                             <div className="rounded-[10px] border border-[#EAECF0] bg-[#F9FAFB] px-4 py-2.5">
 
@@ -484,49 +569,147 @@ export default function UserView() {
 
                             </div>
 
-                            <button
-                                type="button"
-                                onClick={handleBlockToggle}
-                                disabled={
-                                    blockLoading &&
-                                    blockLoadingUserId === user.user_id
-                                }
-                                className={`
-            inline-flex h-[42px] items-center justify-center gap-2
-            rounded-[9px] px-4
-            text-[13px] font-semibold
-            transition-all
-            disabled:cursor-not-allowed
-            disabled:opacity-60
-            ${user.blocked_by_admin
-                                        ? "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                                        : "border border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
+
+                            {/* UNBLOCKED USER */}
+
+                            {!user.blocked_by_admin && (
+                                <>
+                                    {/* ACTIVATE / DEACTIVATE */}
+
+                                    {user.is_deactivated ? (
+
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                handleStatusAction("activate")
+                                            }
+                                            disabled={
+                                                statusLoading ||
+                                                blockLoading
+                                            }
+                                            className="inline-flex h-[42px] items-center justify-center gap-2 rounded-[9px] border border-emerald-200 bg-emerald-50 px-4 text-[13px] font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                        >
+
+                                            {statusLoading &&
+                                                statusLoadingUserId === user.user_id ? (
+                                                <>
+                                                    <Loader2
+                                                        size={16}
+                                                        className="animate-spin"
+                                                    />
+                                                    Updating...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <UserCheck size={16} />
+                                                    Activate User
+                                                </>
+                                            )}
+
+                                        </button>
+
+                                    ) : (
+
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                handleStatusAction("deactivate")
+                                            }
+                                            disabled={
+                                                statusLoading ||
+                                                blockLoading
+                                            }
+                                            className="inline-flex h-[42px] items-center justify-center gap-2 rounded-[9px] border border-orange-200 bg-orange-50 px-4 text-[13px] font-semibold text-orange-700 transition-colors hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                        >
+
+                                            {statusLoading &&
+                                                statusLoadingUserId === user.user_id ? (
+                                                <>
+                                                    <Loader2
+                                                        size={16}
+                                                        className="animate-spin"
+                                                    />
+                                                    Updating...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <UserX size={16} />
+                                                    Deactivate User
+                                                </>
+                                            )}
+
+                                        </button>
+
+                                    )}
+
+
+                                    {/* BLOCK USER */}
+
+                                    <button
+                                        type="button"
+                                        onClick={handleBlockToggle}
+                                        disabled={
+                                            blockLoading ||
+                                            statusLoading
+                                        }
+                                        className="inline-flex h-[42px] items-center justify-center gap-2 rounded-[9px] border border-red-200 bg-red-50 px-4 text-[13px] font-semibold text-red-600 transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+
+                                        {blockLoading &&
+                                            blockLoadingUserId === user.user_id ? (
+                                            <>
+                                                <Loader2
+                                                    size={16}
+                                                    className="animate-spin"
+                                                />
+                                                Updating...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <ShieldAlert size={16} />
+                                                Block User
+                                            </>
+                                        )}
+
+                                    </button>
+
+                                </>
+                            )}
+
+
+                            {/* BLOCKED USER */}
+
+                            {user.blocked_by_admin && (
+
+                                <button
+                                    type="button"
+                                    onClick={handleBlockToggle}
+                                    disabled={
+                                        blockLoading ||
+                                        statusLoading
                                     }
-        `}
-                            >
+                                    className="inline-flex h-[42px] items-center justify-center gap-2 rounded-[9px] border border-emerald-200 bg-emerald-50 px-4 text-[13px] font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
 
-                                {blockLoading &&
-                                    blockLoadingUserId === user.user_id ? (
-                                    <>
-                                        <Loader2
-                                            size={16}
-                                            className="animate-spin"
-                                        />
-                                        Updating...
-                                    </>
-                                ) : user.blocked_by_admin ? (
-                                    <>
-                                        <ShieldCheck size={16} />
-                                        Unblock User
-                                    </>
-                                ) : (
-                                    <>
-                                        <ShieldAlert size={16} />
-                                        Block User
-                                    </>
-                                )}
+                                    {blockLoading &&
+                                        blockLoadingUserId === user.user_id ? (
+                                        <>
+                                            <Loader2
+                                                size={16}
+                                                className="animate-spin"
+                                            />
+                                            Updating...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ShieldCheck size={16} />
+                                            Unblock User
+                                        </>
+                                    )}
 
-                            </button>
+                                </button>
+
+                            )}
 
                         </div>
 
@@ -705,7 +888,10 @@ export default function UserView() {
                         label="Admin Blocked"
                         value={Boolean(user.blocked_by_admin)}
                     />
-
+                    <InfoItem
+                        label="Block Reason"
+                        value={formatValue(user.admin_block_reason)}
+                    />
                     <StatusItem
                         label="Profile Verification"
                         value={Boolean(
@@ -719,7 +905,12 @@ export default function UserView() {
                             user.login_verification_status
                         )}
                     />
-
+                    <InfoItem
+                        label="Deactivation Reason"
+                        value={formatValue(
+                            user.admin_deactivation_reason
+                        )}
+                    />
                 </div>
 
             </InfoSection>
@@ -776,7 +967,79 @@ export default function UserView() {
                 </div>
 
             </InfoSection>
-
+            {statusModalOpen &&
+                statusAction &&
+                selectedUser && (
+                    <ActivationModal
+                        isOpen={true}
+                        title={
+                            statusAction === "deactivate"
+                                ? "Deactivate User?"
+                                : "Activate User?"
+                        }
+                        description={
+                            statusAction === "deactivate"
+                                ? "Please provide a reason for deactivating this user."
+                                : "Please provide a reason for activating this user."
+                        }
+                        actionLabel={
+                            statusAction === "deactivate"
+                                ? "Deactivate User"
+                                : "Activate User"
+                        }
+                        placeholder={
+                            statusAction === "deactivate"
+                                ? "Enter reason for deactivation..."
+                                : "Enter reason for activation..."
+                        }
+                        loading={
+                            statusLoading &&
+                            statusLoadingUserId === selectedUser.user_id
+                        }
+                        onClose={() => {
+                            if (!statusLoading) {
+                                setStatusModalOpen(false);
+                                setStatusAction(null);
+                            }
+                        }}
+                        onConfirm={handleStatusConfirm}
+                    />
+                )}
+            {blockModalOpen && selectedUser && (
+                <ActivationModal
+                    isOpen={true}
+                    title={
+                        selectedUser.blocked_by_admin
+                            ? "Unblock User?"
+                            : "Block User?"
+                    }
+                    description={
+                        selectedUser.blocked_by_admin
+                            ? "Please provide a reason for unblocking this user."
+                            : "Please provide a reason for blocking this user."
+                    }
+                    actionLabel={
+                        selectedUser.blocked_by_admin
+                            ? "Unblock User"
+                            : "Block User"
+                    }
+                    placeholder={
+                        selectedUser.blocked_by_admin
+                            ? "Enter reason for unblocking..."
+                            : "Enter reason for blocking..."
+                    }
+                    loading={
+                        blockLoading &&
+                        blockLoadingUserId === selectedUser.user_id
+                    }
+                    onClose={() => {
+                        if (!blockLoading) {
+                            setBlockModalOpen(false);
+                        }
+                    }}
+                    onConfirm={handleBlockConfirm}
+                />
+            )}
         </div>
     );
 }

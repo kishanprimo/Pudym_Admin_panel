@@ -15,6 +15,7 @@ import {
     FileWarning,
     ShieldAlert,
     DollarSign,
+    Bell,
 } from "lucide-react";
 
 type SubMenuItem = {
@@ -114,6 +115,25 @@ const menuGroups: MenuGroup[] = [
                 name: "Withdrawals",
                 href: "/withdrawal/list",
                 icon: ArrowDownCircle,
+            },
+        ],
+    },
+    {
+        heading: "NOTIFICATIONS",
+        items: [
+            {
+                name: "Notifications",
+                icon: Bell,
+                children: [
+                    {
+                        name: "Notification List",
+                        href: "/notifications",
+                    },
+                    {
+                        name: "Send Notification",
+                        href: "/notifications/send",
+                    },
+                ],
             },
         ],
     },

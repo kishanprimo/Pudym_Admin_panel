@@ -6,13 +6,15 @@ import type {
 
 export const updateCreatorStatus = async (
     userId: number,
-    is_deactivated: boolean
+    is_deactivated: boolean,
+    reason: string
 ): Promise<UpdateCreatorStatusResponse> => {
 
     const response = await api.patch(
         `/admin/creators/${userId}/status`,
         {
             is_deactivated,
+            reason,
         }
     );
 

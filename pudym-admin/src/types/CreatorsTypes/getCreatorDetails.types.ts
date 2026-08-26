@@ -62,7 +62,11 @@ export interface CreatorDetails {
     profile_verification_status: boolean;
 
     is_deactivated: boolean;
+    admin_deactivation_reason: string | null;
 
+    blocked_by_admin: boolean;
+
+    admin_block_reason: string | null;
     available_coins: string | number;
 
     total_socials: number;

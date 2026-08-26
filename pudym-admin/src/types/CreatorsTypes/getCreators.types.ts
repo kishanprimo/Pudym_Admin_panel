@@ -1,6 +1,7 @@
 export type CreatorStatus =
     | "active"
-    | "deactivated";
+    | "deactivated"
+    | "blocked";
 
 export interface CreatorListItem {
     user_id: number;
@@ -40,6 +41,11 @@ export interface CreatorListItem {
     profile_verification_status: boolean;
 
     is_deactivated: boolean;
+    blocked_by_admin: boolean;
+
+    admin_block_reason: string | null;
+
+    admin_deactivation_reason: string | null;
 
     available_coins: string | number;
 

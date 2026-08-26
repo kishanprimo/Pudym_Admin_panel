@@ -3,12 +3,14 @@ import type { UpdateUserStatusResponse } from "@/types/AllUsersTypes/updateUserS
 
 export const updateUserStatus = async (
   userId: number,
-  is_deactivated: boolean
+  is_deactivated: boolean,
+  reason: string
 ): Promise<UpdateUserStatusResponse> => {
   const response = await api.patch(
     `/admin/users/${userId}/status`,
     {
       is_deactivated,
+      reason,
     }
   );
 
