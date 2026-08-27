@@ -10,6 +10,15 @@ interface ActivationModalProps {
     actionLabel: string;
     placeholder?: string;
     loading?: boolean;
+
+    /**
+     * If true, note/reason must be entered.
+     * If false, note is optional.
+     */
+    requiredReason?: boolean;
+
+    reasonLabel?: string;
+
     onClose: () => void;
     onConfirm: (reason: string) => void;
 }
@@ -21,6 +30,8 @@ const ActivationModal = ({
     actionLabel,
     placeholder = "Enter reason...",
     loading = false,
+    requiredReason = true,
+    reasonLabel = "Reason",
     onClose,
     onConfirm,
 }: ActivationModalProps) => {
@@ -39,7 +50,11 @@ const ActivationModal = ({
     const handleConfirm = () => {
         const trimmedReason = reason.trim();
 
-        if (!trimmedReason || loading) {
+        if (loading) {
+            return;
+        }
+
+        if (requiredReason && !trimmedReason) {
             return;
         }
 
@@ -85,9 +100,11 @@ const ActivationModal = ({
                         htmlFor="activation-reason"
                         className="mb-2 block text-[13px] font-semibold text-[#344054]"
                     >
-                        Reason
+                        {reasonLabel}
+                        {requiredReason && (
+                            <span className="text-red-500"> *</span>
+                        )}
                     </label>
-
                     <textarea
                         id="activation-reason"
                         value={reason}
@@ -100,7 +117,7 @@ const ActivationModal = ({
                         className="w-full resize-none rounded-[8px] border border-[#D0D5DD] px-3 py-2.5 text-[13px] text-[#344054] outline-none transition-all placeholder:text-[#98A2B3] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10 disabled:cursor-not-allowed disabled:bg-[#F9FAFB]"
                     />
 
-                    {!reason.trim() && (
+                    {requiredReason && !reason.trim() && (
                         <p className="mt-2 text-[12px] text-[#98A2B3]">
                             A reason is required to continue.
                         </p>
@@ -124,7 +141,7 @@ const ActivationModal = ({
                     <button
                         type="button"
                         onClick={handleConfirm}
-                        disabled={!reason.trim() || loading}
+                        disabled={(requiredReason && !reason.trim()) || loading}
                         className="inline-flex h-[40px] items-center justify-center gap-2 rounded-[8px] bg-[#2563EB] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {loading && (

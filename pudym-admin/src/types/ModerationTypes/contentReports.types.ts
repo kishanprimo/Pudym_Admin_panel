@@ -84,6 +84,7 @@ export interface GetContentReportsParams {
     pageSize?: number;
     search?: string;
     status?: string;
+    social_type?: "post" | "reel" | "";
 }
 
 export interface GetContentReportsResponse {

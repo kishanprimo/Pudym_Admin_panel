@@ -319,6 +319,10 @@ const AllUsers = () => {
             width: "130px",
         },
         {
+            label: "Role",
+            width: "110px",
+        },
+        {
             label: "Location",
             width: "200px",
         },
@@ -347,11 +351,11 @@ const AllUsers = () => {
             "Username",
             "Email",
             "Login Type",
+            "Role",
             "Location",
             "Status",
             "Created At",
         ];
-
         const rows = users.map((user) => {
             const location = formatLocation(
                 user.city,
@@ -377,6 +381,11 @@ const AllUsers = () => {
                 user.email || "N/A",
 
                 user.login_type || "N/A",
+
+                user.role
+                    ? user.role.charAt(0).toUpperCase() +
+                    user.role.slice(1)
+                    : "N/A",
 
                 location,
 
@@ -502,7 +511,7 @@ const AllUsers = () => {
 
                 <div className="w-full overflow-x-auto">
 
-                    <table className="w-full min-w-[1200px] text-left border-collapse">
+                    <table className="w-full min-w-[1350px] text-left border-collapse">
 
                         <TableHeader
                             columns={columns}
@@ -519,7 +528,7 @@ const AllUsers = () => {
 
                                 <tr>
                                     <td
-                                        colSpan={8}
+                                        colSpan={9}
                                         className="px-6 py-16 text-center"
                                     >
                                         <div className="flex flex-col items-center justify-center">
@@ -547,7 +556,7 @@ const AllUsers = () => {
 
                                 users.map((user) => {
 
-                                 
+
                                     const isDeleteLoading =
                                         deleteLoading &&
                                         deleteLoadingUserId ===
@@ -650,6 +659,20 @@ const AllUsers = () => {
                                                     variant="blue"
                                                 />
 
+                                            </td>
+                                            {/* ROLE */}
+
+                                            <td className="px-5 py-4">
+
+                                                <Tags
+                                                    text={
+                                                        user.role
+                                                            ? user.role.charAt(0).toUpperCase() +
+                                                            user.role.slice(1)
+                                                            : "N/A"
+                                                    }
+                                                    variant="purple"
+                                                />
                                             </td>
 
 

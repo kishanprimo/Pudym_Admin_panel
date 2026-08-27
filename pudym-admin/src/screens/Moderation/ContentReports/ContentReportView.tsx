@@ -82,7 +82,10 @@ const ContentReportView = () => {
         removeContentModalOpen,
         setRemoveContentModalOpen,
     ] = useState(false);
-
+    const [
+        selectedMedia,
+        setSelectedMedia,
+    ] = useState<any | null>(null);
     /*
      * ==========================================
      * FETCH REPORT DETAILS
@@ -285,7 +288,18 @@ const ContentReportView = () => {
 
     const reportType =
         report.Report_type;
+    const contentType =
+        String(
+            social?.social_type || ""
+        ).toLowerCase();
 
+    const isReel =
+        contentType.includes("reel");
+
+    const isPost =
+        !isReel;
+    const contentMedia =
+        social?.Media?.[0]?.media_location || "";
     const handleRemoveContent = async () => {
         if (!social?.social_id) {
             return;
@@ -323,9 +337,6 @@ const ContentReportView = () => {
                 "Content removed successfully"
             );
 
-            toast.success(
-                "Content removed successfully"
-            );
         } catch (error) {
             toast.error(
                 error instanceof Error
@@ -596,78 +607,41 @@ const ContentReportView = () => {
 
                         {/* CONTENT */}
 
-                        <div className="flex items-end gap-4">
+                        <div className="relative shrink-0">
 
-                            <div className="relative shrink-0">
+                            {contentMedia && !imageError ? (
 
-                                {social?.reel_thumbnail &&
-                                    !imageError ? (
-
+                                isReel ? (
+                                    <video
+                                        src={contentMedia}
+                                        muted
+                                        playsInline
+                                        autoPlay
+                                        loop
+                                        className="h-[92px] w-[92px] rounded-2xl border-4 border-white object-cover shadow-[0_4px_12px_rgba(16,24,40,0.15)]"
+                                    />
+                                ) : (
                                     <img
-                                        src={
-                                            social.reel_thumbnail
-                                        }
+                                        src={contentMedia}
                                         alt="Reported content"
                                         className="h-[92px] w-[92px] rounded-2xl border-4 border-white object-cover shadow-[0_4px_12px_rgba(16,24,40,0.15)]"
                                         onError={() =>
-                                            setImageError(
-                                                true
-                                            )
+                                            setImageError(true)
                                         }
                                     />
+                                )
 
-                                ) : (
+                            ) : (
 
-                                    <div className="flex h-[92px] w-[92px] items-center justify-center rounded-2xl border-4 border-white bg-[#EFF6FF] text-[#2563EB] shadow-[0_4px_12px_rgba(16,24,40,0.15)]">
+                                <div className="flex h-[92px] w-[92px] items-center justify-center rounded-2xl border-4 border-white bg-[#EFF6FF] text-[#2563EB] shadow-[0_4px_12px_rgba(16,24,40,0.15)]">
 
-                                        <FileWarning
-                                            size={30}
-                                        />
-
-                                    </div>
-
-                                )}
-
-                            </div>
-
-
-                            <div className="pb-1">
-
-                                <div className="flex flex-wrap items-center gap-2">
-
-                                    <h2 className="max-w-[600px] text-[20px] font-bold tracking-[-0.015em] text-[#101828]">
-                                        {social?.social_desc ||
-                                            "Reported Content"}
-                                    </h2>
-
-                                    <Tags
-                                        text={
-                                            reportType?.report_text ||
-                                            "Report"
-                                        }
-                                        variant="blue"
+                                    <FileWarning
+                                        size={30}
                                     />
 
                                 </div>
 
-                                <p className="mt-1 text-[13px] font-medium text-[#667085]">
-                                    {social?.social_type ||
-                                        "N/A"}
-                                </p>
-
-                                {location && (
-                                    <p className="mt-1 flex items-center gap-1 text-[12px] text-[#98A2B3]">
-
-                                        <MapPin
-                                            size={12}
-                                        />
-
-                                        {location}
-
-                                    </p>
-                                )}
-
-                            </div>
+                            )}
 
                         </div>
 
@@ -1058,9 +1032,14 @@ const ContentReportView = () => {
                 <DetailItem
                     label="Content Type"
                     value={
-                        displayValue(
-                            social?.social_type
-                        )
+                        <Tags
+                            text={isReel ? "Reel" : "Post"}
+                            variant={
+                                isReel
+                                    ? "purple"
+                                    : "emerald"
+                            }
+                        />
                     }
                 />
 
@@ -1082,14 +1061,16 @@ const ContentReportView = () => {
                     }
                 />
 
-                <DetailItem
-                    label="Video Height"
-                    value={
-                        social?.video_hight
-                            ? `${social.video_hight}px`
-                            : "N/A"
-                    }
-                />
+                {isReel && (
+                    <DetailItem
+                        label="Video Height"
+                        value={
+                            social?.video_hight
+                                ? `${social.video_hight}px`
+                                : "N/A"
+                        }
+                    />
+                )}
 
                 <DetailItem
                     label="Location"
@@ -1321,9 +1302,17 @@ const ContentReportView = () => {
                 MEDIA
             ======================================== */}
 
+            {/* ========================================
+    MEDIA
+======================================== */}
+
             <DetailSection
                 title="Media"
-                description="Media attached to the reported content."
+                description={
+                    isReel
+                        ? "Video and media attached to the reported reel."
+                        : "Images and media attached to the reported post."
+                }
                 icon={
                     <ImageIcon
                         size={17}
@@ -1342,25 +1331,43 @@ const ContentReportView = () => {
                                 index
                             ) => (
 
-                                <div
+                                <button
+                                    type="button"
                                     key={
                                         media.media_id ??
                                         index
                                     }
-                                    className="overflow-hidden rounded-xl border border-[#EAECF0] bg-[#FAFAFA]"
+                                    onClick={() =>
+                                        setSelectedMedia(
+                                            media
+                                        )
+                                    }
+                                    className="group overflow-hidden rounded-xl border border-[#EAECF0] bg-[#FAFAFA] text-left transition hover:border-[#BFC7D4] hover:shadow-[0_4px_12px_rgba(16,24,40,0.08)] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
                                 >
 
-                                    <div className="flex h-[180px] items-center justify-center bg-[#F2F4F7]">
+                                    <div className="relative flex h-[220px] items-center justify-center overflow-hidden bg-[#F2F4F7]">
 
                                         {media.media_location ? (
 
-                                            <img
-                                                src={
-                                                    media.media_location
-                                                }
-                                                alt="Content media"
-                                                className="h-full w-full object-cover"
-                                            />
+                                            isReel ? (
+                                                <video
+                                                    src={
+                                                        media.media_location
+                                                    }
+                                                    muted
+                                                    playsInline
+                                                    preload="metadata"
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            ) : (
+                                                <img
+                                                    src={
+                                                        media.media_location
+                                                    }
+                                                    alt="Content media"
+                                                    className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                                                />
+                                            )
 
                                         ) : (
 
@@ -1371,9 +1378,48 @@ const ContentReportView = () => {
 
                                         )}
 
+                                        {/* Hover overlay */}
+
+                                        {media.media_location && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition group-hover:bg-black/30">
+
+                                                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-[#344054] opacity-0 shadow-lg transition group-hover:opacity-100">
+
+                                                    {isReel ? (
+                                                        <Eye size={19} />
+                                                    ) : (
+                                                        <ImageIcon size={19} />
+                                                    )}
+
+                                                </div>
+
+                                            </div>
+                                        )}
+
                                     </div>
 
-                                </div>
+                                    <div className="flex items-center justify-between border-t border-[#EAECF0] px-4 py-3">
+
+                                        <div>
+                                            <p className="text-[12px] font-semibold text-[#344054]">
+                                                {isReel
+                                                    ? `Video ${index + 1}`
+                                                    : `Image ${index + 1}`}
+                                            </p>
+
+                                            <p className="mt-0.5 text-[11px] text-[#98A2B3]">
+                                                Click to preview
+                                            </p>
+                                        </div>
+
+                                        <Eye
+                                            size={15}
+                                            className="text-[#98A2B3]"
+                                        />
+
+                                    </div>
+
+                                </button>
 
                             )
                         )}
@@ -1422,6 +1468,118 @@ const ContentReportView = () => {
                         removeContentLoading
                     }
                 />
+            )}
+            {/* ========================================
+    MEDIA PREVIEW MODAL
+======================================== */}
+
+            {selectedMedia?.media_location && (
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+                    onClick={() =>
+                        setSelectedMedia(null)
+                    }
+                >
+
+                    {/* Modal */}
+
+                    <div
+                        className="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-[#101828] shadow-2xl"
+                        onClick={(event) =>
+                            event.stopPropagation()
+                        }
+                    >
+
+                        {/* Header */}
+
+                        <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-[#101828] px-5 py-4">
+
+                            <div>
+
+                                <p className="text-[14px] font-semibold text-white">
+                                    {isReel
+                                        ? "Reported Reel"
+                                        : "Reported Post"}
+                                </p>
+
+                                <p className="mt-0.5 text-[11px] text-[#98A2B3]">
+                                    Media preview
+                                </p>
+
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setSelectedMedia(null)
+                                }
+                                className="flex h-9 w-9 items-center justify-center rounded-lg text-[#98A2B3] transition hover:bg-white/10 hover:text-white"
+                                aria-label="Close media preview"
+                            >
+                                <span className="text-[24px] leading-none">
+                                    ×
+                                </span>
+                            </button>
+
+                        </div>
+
+
+                        {/* Media */}
+
+                        <div className="flex min-h-0 flex-1 items-center justify-center bg-black p-4 md:p-8">
+
+                            {isReel ? (
+
+                                <video
+                                    src={
+                                        selectedMedia.media_location
+                                    }
+                                    controls
+                                    autoPlay
+                                    playsInline
+                                    className="max-h-[75vh] max-w-full rounded-lg object-contain"
+                                />
+
+                            ) : (
+
+                                <img
+                                    src={
+                                        selectedMedia.media_location
+                                    }
+                                    alt="Reported content"
+                                    className="max-h-[75vh] max-w-full rounded-lg object-contain"
+                                />
+
+                            )}
+
+                        </div>
+
+
+                        {/* Footer */}
+
+                        <div className="flex shrink-0 items-center justify-between border-t border-white/10 bg-[#101828] px-5 py-3">
+
+                            <p className="text-[11px] text-[#98A2B3]">
+                                {isReel
+                                    ? "Use the video controls to inspect the reel."
+                                    : "Click outside the preview or × to close."}
+                            </p>
+
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setSelectedMedia(null)
+                                }
+                                className="rounded-lg bg-white px-4 py-2 text-[12px] font-semibold text-[#344054] transition hover:bg-[#F2F4F7]"
+                            >
+                                Close
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
             )}
         </div>
     );

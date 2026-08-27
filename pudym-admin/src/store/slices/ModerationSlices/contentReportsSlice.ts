@@ -108,6 +108,7 @@ export const fetchContentReports =
             pageSize?: number;
             search?: string;
             status?: string;
+            social_type?: "post" | "reel" | "";
         },
         { rejectValue: string }
     >(

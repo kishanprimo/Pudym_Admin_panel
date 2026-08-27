@@ -10,6 +10,7 @@ import withdrawalReducer from "@/store/slices/WithdrawalSlices/withdrawalSlice";
 import contentReportsReducer from "@/store/slices/ModerationSlices/contentReportsSlice";
 import userReportsReducer from "@/store/slices/ModerationSlices/userReportsSlice";
 import notificationReducer from "@/store/slices/NotificationSlices/notificationSlice";
+import reactivationRequestsReducer from "@/store/slices/AccountManagement/reactivationRequestsSlice";
 
 export const store = configureStore({
     reducer: {
@@ -23,6 +24,7 @@ export const store = configureStore({
         contentReports: contentReportsReducer,
         userReports: userReportsReducer,
         notification: notificationReducer,
+        reactivationRequests: reactivationRequestsReducer,
     },
 });
 

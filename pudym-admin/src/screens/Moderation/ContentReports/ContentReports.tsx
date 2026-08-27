@@ -61,8 +61,8 @@ const ContentReports = () => {
     const [statusFilter, setStatusFilter] =
         useState("");
 
-    const [exportOpen, setExportOpen] =
-        useState(false);
+    const [socialTypeFilter, setSocialTypeFilter] =
+        useState<"" | "post" | "reel">("");
 
     const [currentPage, setCurrentPage] =
         useState(1);
@@ -85,6 +85,7 @@ const ContentReports = () => {
                 pageSize: rowsPerPage,
                 search: searchTerm,
                 status: statusFilter,
+                social_type: socialTypeFilter,
             })
         );
     }, [
@@ -93,6 +94,7 @@ const ContentReports = () => {
         rowsPerPage,
         searchTerm,
         statusFilter,
+        socialTypeFilter,
     ]);
 
     /*
@@ -107,6 +109,12 @@ const ContentReports = () => {
         );
     }, [dispatch]);
 
+    const handleSocialTypeChange = (
+        type: "" | "post" | "reel"
+    ) => {
+        setSocialTypeFilter(type);
+        setCurrentPage(1);
+    };
     /*
      * ==========================================
      * SEARCH
@@ -190,7 +198,17 @@ const ContentReports = () => {
             ""
         )}`;
     };
+    const getContentType = (social: any) => {
+        const type = String(
+            social?.social_type || ""
+        ).toLowerCase();
 
+        if (type.includes("reel")) {
+            return "Reel";
+        }
+
+        return "Post";
+    };
     const getAvatarText = (
         user: any
     ) => {
@@ -329,7 +347,7 @@ const ContentReports = () => {
     const columns = [
         {
             label: "Content",
-            width: "280px",
+            width: "300px",
         },
 
         {
@@ -348,6 +366,11 @@ const ContentReports = () => {
         },
 
         {
+            label: "Social Type",
+            width: "130px",
+        },
+
+        {
             label: "Content Status",
             width: "150px",
         },
@@ -360,11 +383,9 @@ const ContentReports = () => {
         {
             label: "Action",
             width: "120px",
-            className:
-                "text-center",
+            className: "text-center",
         },
     ];
-
     /*
      * ==========================================
      * EXPORT
@@ -386,6 +407,7 @@ const ContentReports = () => {
             "Reported By",
             "Content Owner",
             "Report Reason",
+            "Social Type",
             "Status",
             "Created At",
         ];
@@ -428,9 +450,9 @@ const ContentReports = () => {
                         reportedBy,
                         owner,
                         reason,
+                        getContentType(report.Social),
                         status,
-                        report.createdAt ||
-                        "N/A",
+                        report.createdAt || "N/A",
                     ];
                 }
             );
@@ -506,9 +528,7 @@ const ContentReports = () => {
                 })
             ).unwrap();
 
-            dispatch(
-                fetchContentReportStats()
-            );
+            dispatch(fetchContentReportStats());
         } catch (error) {
             toast.error(
                 error instanceof Error
@@ -527,9 +547,19 @@ const ContentReports = () => {
                 removeContentReport(deleteReportId)
             ).unwrap();
 
-            dispatch(
+            await dispatch(
+                fetchContentReports({
+                    page: currentPage,
+                    pageSize: rowsPerPage,
+                    search: searchTerm,
+                    status: statusFilter,
+                    social_type: socialTypeFilter,
+                })
+            ).unwrap();
+
+            await dispatch(
                 fetchContentReportStats()
-            );
+            ).unwrap();
 
             toast.success(
                 "Content report deleted successfully"
@@ -543,6 +573,9 @@ const ContentReports = () => {
                     : "Failed to delete content report"
             );
         }
+    };
+    const getContentMedia = (social: any) => {
+        return social?.Media?.[0]?.media_location || "";
     };
     return (
         <div className="px-5 py-5 md:px-6 lg:px-7">
@@ -565,16 +598,47 @@ const ContentReports = () => {
 
                 <div className="flex w-full flex-wrap items-center gap-3 lg:w-auto">
 
+                    {/* SEARCH */}
+
                     <div className="w-full lg:w-[305px]">
                         <Search
-                            searchTerm={
-                                searchInput
-                            }
-                            setSearchTerm={
-                                handleSearchChange
-                            }
+                            searchTerm={searchInput}
+                            setSearchTerm={handleSearchChange}
                             placeholder="Search content reports..."
                         />
+                    </div>
+
+                    {/* SOCIAL TYPE FILTER */}
+
+                    <div className="relative w-full lg:w-[150px]">
+
+                        <select
+                            value={socialTypeFilter}
+                            onChange={(e) =>
+                                handleSocialTypeChange(
+                                    e.target.value as "" | "post" | "reel"
+                                )
+                            }
+                            className="h-[36px] w-full appearance-none rounded-lg border border-[#D0D5DD] bg-white px-3 pr-9 text-[13px] font-medium text-[#344054] outline-none transition focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
+                        >
+                            <option value="">
+                                All
+                            </option>
+
+                            <option value="post">
+                                Post
+                            </option>
+
+                            <option value="reel">
+                                Reel
+                            </option>
+                        </select>
+
+                        <ChevronDown
+                            size={16}
+                            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#667085]"
+                        />
+
                     </div>
 
                 </div>
@@ -626,7 +690,7 @@ const ContentReports = () => {
                                 <tr>
                                     <td
                                         colSpan={
-                                            7
+                                            8
                                         }
                                         className="px-6 py-16 text-center"
                                     >
@@ -689,26 +753,36 @@ const ContentReports = () => {
                                                 className="transition-colors hover:bg-[#F9FAFB]"
                                             >
 
+
+
                                                 {/* CONTENT */}
 
                                                 <td className="px-5 py-4">
 
                                                     <div className="flex items-center gap-3">
 
-                                                        {social?.reel_thumbnail ? (
-                                                            <img
-                                                                src={
-                                                                    social.reel_thumbnail
-                                                                }
-                                                                alt="Content"
-                                                                className="h-11 w-11 shrink-0 rounded-lg border border-gray-200 object-cover"
-                                                            />
+                                                        {/* CONTENT THUMBNAIL */}
+
+                                                        {getContentMedia(social) ? (
+                                                            getContentType(social) === "Reel" ? (
+                                                                <video
+                                                                    src={getContentMedia(social)}
+                                                                    muted
+                                                                    playsInline
+                                                                    preload="metadata"
+                                                                    className="h-11 w-11 shrink-0 rounded-lg border border-gray-200 object-cover"
+                                                                />
+                                                            ) : (
+                                                                <img
+                                                                    src={getContentMedia(social)}
+                                                                    alt={getContentType(social)}
+                                                                    className="h-11 w-11 shrink-0 rounded-lg border border-gray-200 object-cover"
+                                                                />
+                                                            )
                                                         ) : (
                                                             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[#D0D5DD] bg-[#EFF6FF]">
                                                                 <FileWarning
-                                                                    size={
-                                                                        18
-                                                                    }
+                                                                    size={18}
                                                                     className="text-[#2563EB]"
                                                                 />
                                                             </div>
@@ -718,28 +792,10 @@ const ContentReports = () => {
 
                                                             <p
                                                                 className="max-w-[210px] truncate text-[14px] font-semibold text-[#101828]"
-                                                                title={
-                                                                    social?.social_desc ||
-                                                                    ""
-                                                                }
+                                                                title={social?.social_desc || ""}
                                                             >
-                                                                {social?.social_desc ||
-                                                                    "N/A"}
+                                                                {social?.social_desc || "N/A"}
                                                             </p>
-
-                                                            <p className="mt-1 text-[12px] text-[#667085]">
-                                                                {social?.social_type ||
-                                                                    "N/A"}
-                                                            </p>
-
-                                                            {isRemoved && (
-                                                                <div className="mt-1.5">
-                                                                    <Tags
-                                                                        text="Content Removed"
-                                                                        variant="red"
-                                                                    />
-                                                                </div>
-                                                            )}
 
                                                         </div>
 
@@ -838,16 +894,28 @@ const ContentReports = () => {
                                                     </div>
 
                                                 </td>
-
                                                 {/* REPORT REASON */}
 
                                                 <td className="px-5 py-4">
 
                                                     <Tags
-                                                        text={
-                                                            reason
-                                                        }
+                                                        text={reason}
                                                         variant="blue"
+                                                    />
+
+                                                </td>
+
+                                                {/* SOCIAL TYPE */}
+
+                                                <td className="px-5 py-4">
+
+                                                    <Tags
+                                                        text={getContentType(social)}
+                                                        variant={
+                                                            getContentType(social) === "Reel"
+                                                                ? "purple"
+                                                                : "emerald"
+                                                        }
                                                     />
 
                                                 </td>

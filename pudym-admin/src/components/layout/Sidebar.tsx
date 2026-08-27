@@ -16,6 +16,7 @@ import {
     ShieldAlert,
     DollarSign,
     Bell,
+    RotateCcw,
 } from "lucide-react";
 
 type SubMenuItem = {
@@ -84,6 +85,16 @@ const menuGroups: MenuGroup[] = [
                 name: "User Reports",
                 href: "/moderation/user-reports",
                 icon: ShieldAlert,
+            },
+        ],
+    },
+    {
+        heading: "ACCOUNT MANAGEMENT",
+        items: [
+            {
+                name: "Reactivation Requests",
+                href: "/AccountManagement/reactivation-requests",
+                icon: RotateCcw,
             },
         ],
     },
