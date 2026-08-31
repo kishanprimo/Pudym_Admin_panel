@@ -1,58 +1,105 @@
+"use client";
+
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  Users,
+  UserCheck,
+  Crown,
+  IndianRupee,
+} from "lucide-react";
+
+import type {
+  AppDispatch,
+  RootState,
+} from "@/store/store";
+
+import {
+  fetchDashboardStats,
+} from "@/store/slices/DashboardSlices/dashboardSlice";
+
+import StatsCards from "@/components/common/StatsCard";
+
 const DashboardPage = () => {
+  const dispatch = useDispatch<AppDispatch>();
+
+  const {
+    stats,
+    loading,
+    error,
+  } = useSelector(
+    (state: RootState) => state.dashboard
+  );
+
+  useEffect(() => {
+    dispatch(fetchDashboardStats());
+  }, [dispatch]);
+
+  const formatNumber = (value: number) => {
+    return new Intl.NumberFormat("en-IN").format(value);
+  };
+
+  const formatRevenue = (value: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  const dashboardStats = [
+    {
+      label: "Total Users",
+      value: formatNumber(stats.total_users),
+      icon: <Users size={28} className="text-violet-600" />,
+      bg: "bg-violet-50",
+    },
+    {
+      label: "Active Users",
+      value: formatNumber(stats.active_users),
+      icon: <UserCheck size={28} className="text-emerald-600" />,
+      bg: "bg-emerald-50",
+    },
+    {
+      label: "Total Creators",
+      value: formatNumber(stats.total_creators),
+      icon: <Crown size={28} className="text-amber-600" />,
+      bg: "bg-amber-50",
+    },
+    {
+      label: "Total Revenue",
+      value: formatRevenue(stats.total_revenue),
+      icon: <IndianRupee size={28} className="text-orange-600" />,
+      bg: "bg-orange-50",
+    },
+  ];
+
   return (
     <div className="px-4 py-6 md:px-6 lg:px-8">
-      <div className="mb-8">
+      {/* Header */}
+      <div className="mb-7">
         <h1 className="text-2xl font-semibold text-[#101828] md:text-3xl">
           Dashboard
         </h1>
 
         <p className="mt-1 text-[15px] text-[#667085]">
-          Welcome back! Here&apos;s what&apos;s
-          happening today.
+          Welcome back! Here&apos;s what&apos;s happening today.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-gray-500">
-            Total Users
-          </p>
-
-          <h2 className="mt-2 text-3xl font-bold text-gray-900">
-            12,450
-          </h2>
+      {/* Error */}
+      {error && (
+        <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          {error}
         </div>
+      )}
 
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-gray-500">
-            Active Users
-          </p>
-
-          <h2 className="mt-2 text-3xl font-bold text-gray-900">
-            8,240
-          </h2>
-        </div>
-
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-gray-500">
-            Total Creators
-          </p>
-
-          <h2 className="mt-2 text-3xl font-bold text-gray-900">
-            1,284
-          </h2>
-        </div>
-
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-gray-500">
-            Total Revenue
-          </p>
-
-          <h2 className="mt-2 text-3xl font-bold text-gray-900">
-            ₹12.45L
-          </h2>
-        </div>
-      </div>
+      {/* Dashboard Stats */}
+      <StatsCards
+        stats={dashboardStats}
+        cols={4}
+        loading={loading}
+      />
     </div>
   );
 };

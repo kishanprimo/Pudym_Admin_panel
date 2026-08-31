@@ -11,11 +11,19 @@ import contentReportsReducer from "@/store/slices/ModerationSlices/contentReport
 import userReportsReducer from "@/store/slices/ModerationSlices/userReportsSlice";
 import notificationReducer from "@/store/slices/NotificationSlices/notificationSlice";
 import reactivationRequestsReducer from "@/store/slices/AccountManagement/reactivationRequestsSlice";
+import dashboardReducer from "@/store/slices/DashboardSlices/dashboardSlice";
+import revenueReportReducer from "@/store/slices/RevenueGrowthSlices/revenueReportSlice";
+import userGrowthReducer from "@/store/slices/RevenueGrowthSlices/userGrowthSlice";
+import creatorGrowthReducer from "@/store/slices/RevenueGrowthSlices/creatorGrowthSlice";
+import creatorSubscriptionReducer from "@/store/slices/RevenueGrowthSlices/creatorSubscriptionSlice";
+import creatorPlansReducer from "@/store/slices/CreatorPlansSlices/creatorPlansSlice";
+
 
 export const store = configureStore({
     reducer: {
         auth: authReducer,
         allUsers: allUsersReducer,
+        dashboard: dashboardReducer,
         creatorRequests: creatorRequestsReducer,
         creators: creatorsReducer,
         fees: feesReducer,
@@ -25,6 +33,11 @@ export const store = configureStore({
         userReports: userReportsReducer,
         notification: notificationReducer,
         reactivationRequests: reactivationRequestsReducer,
+        revenueReport: revenueReportReducer,
+        userGrowth: userGrowthReducer,
+        creatorGrowth: creatorGrowthReducer,
+        creatorSubscription: creatorSubscriptionReducer,
+        creatorPlans: creatorPlansReducer,
     },
 });
 

@@ -17,6 +17,8 @@ import {
     DollarSign,
     Bell,
     RotateCcw,
+    TrendingUp,
+    BadgeDollarSign,
 } from "lucide-react";
 
 type SubMenuItem = {
@@ -130,6 +132,16 @@ const menuGroups: MenuGroup[] = [
         ],
     },
     {
+        heading: "CREATOR PLAN",
+        items: [
+            {
+                name: "Creator's Plan",
+                href: "/creator-plans/list",
+                icon: BadgeDollarSign,
+            },
+        ],
+    },
+    {
         heading: "NOTIFICATIONS",
         items: [
             {
@@ -143,6 +155,26 @@ const menuGroups: MenuGroup[] = [
                     {
                         name: "Send Notification",
                         href: "/notifications/send",
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        heading: "REVENUE & GROWTH",
+        items: [
+            {
+                name: "Revenue & Growth",
+                icon: TrendingUp,
+                children: [
+                    {
+                        name: "Transaction History",
+                        href: "/revenue-growth/revenue",
+                    },
+
+                    {
+                        name: "Creator Subscriptions",
+                        href: "/revenue-growth/creator-subscriptions",
                     },
                 ],
             },
