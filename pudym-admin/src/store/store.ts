@@ -17,7 +17,8 @@ import userGrowthReducer from "@/store/slices/RevenueGrowthSlices/userGrowthSlic
 import creatorGrowthReducer from "@/store/slices/RevenueGrowthSlices/creatorGrowthSlice";
 import creatorSubscriptionReducer from "@/store/slices/RevenueGrowthSlices/creatorSubscriptionSlice";
 import creatorPlansReducer from "@/store/slices/CreatorPlansSlices/creatorPlansSlice";
-
+import contentManagementReducer
+    from "@/store/slices/ContentManagementSlices/contentManagementSlice";
 
 export const store = configureStore({
     reducer: {
@@ -25,6 +26,7 @@ export const store = configureStore({
         allUsers: allUsersReducer,
         dashboard: dashboardReducer,
         creatorRequests: creatorRequestsReducer,
+        contentManagement: contentManagementReducer,
         creators: creatorsReducer,
         fees: feesReducer,
         creatorFees: creatorFeesReducer,

@@ -19,6 +19,7 @@ import {
     RotateCcw,
     TrendingUp,
     BadgeDollarSign,
+    FileVideo,
 } from "lucide-react";
 
 type SubMenuItem = {
@@ -57,6 +58,33 @@ const menuGroups: MenuGroup[] = [
                 name: "All Users",
                 href: "/AllUsers/userslist",
                 icon: Users,
+            },
+        ],
+    },
+    {
+        heading: "CONTENT MANAGEMENT",
+        items: [
+            {
+                name: "Content Management",
+                icon: FileVideo,
+                children: [
+                    {
+                        name: "Posts",
+                        href: "/ContentManagement/posts",
+                    },
+                    {
+                        name: "Reels",
+                        href: "/ContentManagement/reels",
+                    },
+                    {
+                        name: "Tweets",
+                        href: "/ContentManagement/tweets",
+                    },
+                    {
+                        name: "Campaigns",
+                        href: "/ContentManagement/campaigns",
+                    },
+                ],
             },
         ],
     },
