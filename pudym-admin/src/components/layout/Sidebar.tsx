@@ -20,6 +20,8 @@ import {
     TrendingUp,
     BadgeDollarSign,
     FileVideo,
+    Gift,
+    Settings as SettingsIcon,
 } from "lucide-react";
 
 type SubMenuItem = {
@@ -83,6 +85,25 @@ const menuGroups: MenuGroup[] = [
                     {
                         name: "Campaigns",
                         href: "/ContentManagement/campaigns",
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        heading: "GIFT MANAGEMENT",
+        items: [
+            {
+                name: "Gift Management",
+                icon: Gift,
+                children: [
+                    {
+                        name: "Gift List",
+                        href: "/Gifts/gift-list",
+                    },
+                    {
+                        name: "Gift Category List",
+                        href: "/Gifts/gift-category-list",
                     },
                 ],
             },
@@ -205,6 +226,16 @@ const menuGroups: MenuGroup[] = [
                         href: "/revenue-growth/creator-subscriptions",
                     },
                 ],
+            },
+        ],
+    },
+    {
+        heading: "SETTINGS",
+        items: [
+            {
+                name: "Settings",
+                href: "/settings",
+                icon: SettingsIcon,
             },
         ],
     },

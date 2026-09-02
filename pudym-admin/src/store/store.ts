@@ -17,8 +17,10 @@ import userGrowthReducer from "@/store/slices/RevenueGrowthSlices/userGrowthSlic
 import creatorGrowthReducer from "@/store/slices/RevenueGrowthSlices/creatorGrowthSlice";
 import creatorSubscriptionReducer from "@/store/slices/RevenueGrowthSlices/creatorSubscriptionSlice";
 import creatorPlansReducer from "@/store/slices/CreatorPlansSlices/creatorPlansSlice";
-import contentManagementReducer
-    from "@/store/slices/ContentManagementSlices/contentManagementSlice";
+import contentManagementReducer from "@/store/slices/ContentManagementSlices/contentManagementSlice";
+import giftsReducer from "@/store/slices/GiftsSlices/giftsSlice";
+import giftCategoryReducer from "@/store/slices/GiftsSlices/giftCategorySlice";
+import settingsReducer from "@/store/slices/SettingsSlices/settingsSlice";
 
 export const store = configureStore({
     reducer: {
@@ -40,6 +42,9 @@ export const store = configureStore({
         creatorGrowth: creatorGrowthReducer,
         creatorSubscription: creatorSubscriptionReducer,
         creatorPlans: creatorPlansReducer,
+        gifts: giftsReducer,
+        giftCategories: giftCategoryReducer,
+        settings: settingsReducer,
     },
 });
 
