@@ -19,6 +19,9 @@ import {
     RotateCcw,
     TrendingUp,
     BadgeDollarSign,
+    FileVideo,
+    Gift,
+    Settings as SettingsIcon,
 } from "lucide-react";
 
 type SubMenuItem = {
@@ -57,6 +60,52 @@ const menuGroups: MenuGroup[] = [
                 name: "All Users",
                 href: "/AllUsers/userslist",
                 icon: Users,
+            },
+        ],
+    },
+    {
+        heading: "CONTENT MANAGEMENT",
+        items: [
+            {
+                name: "Content Management",
+                icon: FileVideo,
+                children: [
+                    {
+                        name: "Posts",
+                        href: "/ContentManagement/posts",
+                    },
+                    {
+                        name: "Reels",
+                        href: "/ContentManagement/reels",
+                    },
+                    {
+                        name: "Tweets",
+                        href: "/ContentManagement/tweets",
+                    },
+                    {
+                        name: "Campaigns",
+                        href: "/ContentManagement/campaigns",
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        heading: "GIFT MANAGEMENT",
+        items: [
+            {
+                name: "Gift Management",
+                icon: Gift,
+                children: [
+                    {
+                        name: "Gift List",
+                        href: "/Gifts/gift-list",
+                    },
+                    {
+                        name: "Gift Category List",
+                        href: "/Gifts/gift-category-list",
+                    },
+                ],
             },
         ],
     },
@@ -177,6 +226,16 @@ const menuGroups: MenuGroup[] = [
                         href: "/revenue-growth/creator-subscriptions",
                     },
                 ],
+            },
+        ],
+    },
+    {
+        heading: "SETTINGS",
+        items: [
+            {
+                name: "Settings",
+                href: "/settings",
+                icon: SettingsIcon,
             },
         ],
     },
