@@ -23,12 +23,15 @@ const initialState: DashboardState = {
     blocked_users: 0,
     total_creators: 0,
     total_revenue: 0,
+    total_withdrawal_coins: 0,
+
+    top_users: [],
+    top_creators: [],
   },
 
   loading: false,
   error: null,
 };
-
 /**
  * Get Dashboard Statistics
  */
