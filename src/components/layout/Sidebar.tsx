@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     LayoutDashboard,
     Users,
@@ -254,7 +254,7 @@ const Sidebar = ({
 
     const [expandedMenu, setExpandedMenu] =
         useState<string | null>(null);
-
+    const menuScrollRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         menuGroups.forEach((group) => {
             group.items.forEach((item) => {
@@ -268,7 +268,43 @@ const Sidebar = ({
             });
         });
     }, [pathname]);
+    useEffect(() => {
+        const menu = menuScrollRef.current;
 
+        if (!menu) return;
+
+        const handleScroll = () => {
+            sessionStorage.setItem(
+                "admin-sidebar-scroll",
+                String(menu.scrollTop)
+            );
+        };
+
+        menu.addEventListener("scroll", handleScroll);
+
+        return () => {
+            menu.removeEventListener("scroll", handleScroll);
+        };
+    }, []);
+    useEffect(() => {
+        const restoreScroll = () => {
+            const menu = menuScrollRef.current;
+
+            if (!menu) return;
+
+            const savedScroll = sessionStorage.getItem(
+                "admin-sidebar-scroll"
+            );
+
+            if (savedScroll !== null) {
+                menu.scrollTop = Number(savedScroll);
+            }
+        };
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(restoreScroll);
+        });
+    }, [pathname]);
     return (
         <>
             {/* Mobile Overlay */}
@@ -320,12 +356,13 @@ const Sidebar = ({
 
                 {/* Menu */}
                 <div
+                    ref={menuScrollRef}
                     className="
-            h-[calc(100vh-70px)]
-            overflow-y-auto
-            py-6
-            custom-scrollbar
-          "
+                                h-[calc(100vh-70px)]
+                                overflow-y-auto
+                                py-6
+                                custom-scrollbar
+                            "
                 >
                     <nav className="space-y-8">
                         {menuGroups.map((group) => (

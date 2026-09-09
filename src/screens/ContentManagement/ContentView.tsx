@@ -305,7 +305,7 @@ const ContentView = () => {
                                                     )}
                                                 </div>
                                                 <p className="mt-1 text-[13px] leading-5 text-[#475467]">
-                                                    {comment.comment_text || "No comment text"}
+                                                    {comment.comment || "No comment text"}
                                                 </p>
                                                 {comment.createdAt && (
                                                     <p className="mt-1.5 text-[11px] text-[#98A2B3]">

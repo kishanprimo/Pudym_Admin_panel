@@ -15,7 +15,7 @@ export interface ContentComment {
     comment_id: number;
     social_id: number;
     comment_by?: number;
-    comment_text?: string;
+    comment: string;
     createdAt?: string;
     updatedAt?: string;
     commenter?: ContentUser;
